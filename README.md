@@ -22,8 +22,63 @@ composer test
 
 ### Usage
 
-#### Nested accessor
+#### NestedAccessor
 
 ```php
-// under construction
+
+use Smoren\NestedAccessor\Components\NestedAccessor;
+
+$source = [
+    'data' => [
+        'id' => 1,
+        'name' => 'Countries classifier',
+    ],
+    'countries' => [
+        [
+            'name' => 'Russia',
+            'cities' => [
+                [
+                    'name' => 'Moscow',
+                    'extra' => [
+                        'codes' => [
+                            ['value' => 7495],
+                            ['value' => 7499],
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'Petersburg',
+                    'extra' => [
+                        'codes' => [
+                            ['value' => 7812],
+                        ],
+                    ],
+                ],
+            ],
+        ],
+        [
+            'name' => 'Belarus',
+            'cities' => [
+                [
+                    'name' => 'Minsk',
+                    'extra' => [
+                        'codes' => [
+                            ['value' => 375017],
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ]
+];
+
+$accessor = new NestedAccessor($input);
+
+echo $accessor->get('data.name'); // 'Countries classifier'
+print_r($accessor->get('countries.name')); // ['Russia', 'Belarus']
+print_r($accessor->get('countries.cities.name')); // ['Moscow', 'Petersburg', 'Minsk']
+print_r($accessor->get('countries.cities.extra.codes.value')); // [7495, 7499, 7812, 375017]
+
+$accessor->set('data.name', 'New name');
+echo $accessor->get('data.name'); // 'New name'
 ```
