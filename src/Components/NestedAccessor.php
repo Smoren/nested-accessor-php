@@ -163,14 +163,19 @@ class NestedAccessor implements NestedAccessorInterface
                 // go to the next nested level
                 $source = $source[$key];
             } elseif(is_object($source)) {
-                if(!property_exists($source, $key)) {
+                $getterName = 'get'.ucfirst($key);
+                if(method_exists($source, $getterName)) {
+                    // go to the next nested level
+                    $source = $source->{$getterName}();
+                } elseif(property_exists($source, $key)) {
+                    // go to the next nested level
+                    $source = $source->{$key};
+                } else {
                     // path part key is missing in source object
                     $errorsCount++;
                     // we cannot go deeper
                     return;
                 }
-                // go to the next nested level
-                $source = $source->{$key};
             } else {
                 // source is scalar, so we can't go to the next depth level
                 $errorsCount++;

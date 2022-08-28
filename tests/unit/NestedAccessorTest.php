@@ -99,6 +99,10 @@ class NestedAccessorTest extends \Codeception\Test\Unit
         }
     }
 
+    /**
+     * @return void
+     * @throws NestedAccessorException
+     */
     public function testReadFromNonAssocArray()
     {
         $source = [
@@ -124,6 +128,26 @@ class NestedAccessorTest extends \Codeception\Test\Unit
         ];
         $accessor = new NestedAccessor($source);
         $this->assertEquals([1, 2, 3], $accessor->get('id'));
+    }
+
+    public function testReadFromPropertyGetter()
+    {
+        $source = new class(5) {
+            protected int $myProp;
+
+            public function __construct(int $myProp)
+            {
+                $this->myProp = $myProp;
+            }
+
+            public function getMyProp(): int
+            {
+                return -$this->myProp;
+            }
+        };
+
+        $accessor = new NestedAccessor($source);
+        $this->assertEquals(-5, $accessor->get('myProp'));
     }
 
     /**
