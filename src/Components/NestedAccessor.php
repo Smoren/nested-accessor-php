@@ -138,6 +138,19 @@ class NestedAccessor implements NestedAccessorInterface
 
         // let's iterate every path part from stack
         while(count($path)) {
+            if(is_array($source) && !ArrayHelper::isAssoc($source)) {
+                // the result will be multiple
+                if(!is_array($result)) {
+                    $result = [];
+                }
+                // and we need to use recursive call for each item of this array
+                foreach($source as $item) {
+                    $this->_get($item, $path, $result, $errorsCount);
+                }
+                // we don't need to do something in this recursive branch
+                return;
+            }
+
             $key = array_pop($path);
 
             if(is_array($source)) {

@@ -99,6 +99,33 @@ class NestedAccessorTest extends \Codeception\Test\Unit
         }
     }
 
+    public function testReadFromNonAssocArray()
+    {
+        $source = [
+            ['data' => ['values' => [['value' => 1], ['value' => 2]]]],
+            ['data' => ['values' => [['value' => 3]]]],
+            ['data' => ['values' => [['value' => 4], ['value' => 5]]]],
+        ];
+        $accessor = new NestedAccessor($source);
+        $this->assertEquals([1, 2, 3, 4, 5], $accessor->get('data.values.value'));
+
+        $source = [
+            ['data' => ['id' => 1]],
+            ['data' => ['id' => 2]],
+            ['data' => ['id' => 3]],
+        ];
+        $accessor = new NestedAccessor($source);
+        $this->assertEquals([1, 2, 3], $accessor->get('data.id'));
+
+        $source = [
+            ['id' => 1],
+            ['id' => 2],
+            ['id' => 3],
+        ];
+        $accessor = new NestedAccessor($source);
+        $this->assertEquals([1, 2, 3], $accessor->get('id'));
+    }
+
     /**
      * @throws NestedAccessorException
      */
