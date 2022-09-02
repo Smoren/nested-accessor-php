@@ -122,20 +122,6 @@ class NestedAccessor implements NestedAccessorInterface
      */
     protected function _get($source, array $path, &$result, int &$errorsCount): void
     {
-        // if path stack is empty — we reached target value of given path in source argument
-        if(!count($path)) {
-            // so if result is multiple
-            if(is_array($result)) {
-                // we append source to result
-                $result[] = $source;
-            } else {
-                // result is single
-                $result = $source;
-            }
-            // we don't need to do something in this recursive branch
-            return;
-        }
-
         // let's iterate every path part from stack
         while(count($path)) {
             if(is_array($source) && !ArrayHelper::isAssoc($source)) {
@@ -199,9 +185,16 @@ class NestedAccessor implements NestedAccessorInterface
             }
         }
 
-        // if all the path successfully passed
-        // we need only one recursive call to save source to result
-        $this->_get($source, $path, $result, $errorsCount);
+        // now path stack is empty — we reached target value of given path in source argument
+        // so if result is multiple
+        if(is_array($result)) {
+            // we append source to result
+            $result[] = $source;
+        } else {
+            // result is single
+            $result = $source;
+        }
+        // that's all folks!
     }
 
     /**
