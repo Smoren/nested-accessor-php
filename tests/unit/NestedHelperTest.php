@@ -27,5 +27,9 @@ class NestedHelperTest extends \Codeception\Test\Unit
         $this->assertEquals(123, NestedHelper::get($source, ['test', 'value']));
         $this->assertEquals(123, NestedHelper::get($source, 'test.value'));
         $this->assertEquals(null, NestedHelper::get($source, 'unknown.value', false));
+
+        $source = ['test' => [1, 2]];
+        NestedHelper::append($source, ['test'], 3);
+        $this->assertEquals([1, 2, 3], NestedHelper::get($source, ['test']));
     }
 }

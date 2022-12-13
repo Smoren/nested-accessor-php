@@ -20,5 +20,9 @@ class NestedStorageTest extends \Codeception\Test\Unit
         $ns->set(['a', 'd'], 22);
         $this->assertEquals([1, 2], $ns->get(['a', 'b', 'c']));
         $this->assertEquals(22, $ns->get(['a', 'd']));
+
+        $ns = new NestedArrayStorage(['test' => [1, 2]]);
+        $ns->append('test', 3);
+        $this->assertEquals([1, 2, 3], $ns->get(['test']));
     }
 }

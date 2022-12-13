@@ -69,9 +69,7 @@ class NestedAccessor implements NestedAccessorInterface
             return $this->source;
         }
 
-        if(!is_array($path)) {
-            $path = explode($this->pathDelimiter, $path);
-        }
+        $path = $this->formatPath($path);
 
         // let result be null and there are no errors by default
         $result = null;
@@ -106,10 +104,22 @@ class NestedAccessor implements NestedAccessorInterface
      */
     public function set($path, $value, bool $strict = true): self
     {
-        if(!is_array($path)) {
-            $path = explode($this->pathDelimiter, $path);
-        }
-        return $this->_set($this->source, $path, $value, $strict);
+        $path = $this->formatPath($path);
+        return $this->_set($this->source, $path, $value, false, $strict);
+    }
+
+    /**
+     * Appender of source part specified by nested path
+     * @param string|array<string> $path nested path
+     * @param mixed $value value to save by path
+     * @param bool $strict when true throw exception if path not exist in source object
+     * @return $this
+     * @throws NestedAccessorException
+     */
+    public function append($path, $value, bool $strict = true): self
+    {
+        $path = $this->formatPath($path);
+        return $this->_set($this->source, $path, $value, true, $strict);
     }
 
     /**
@@ -202,11 +212,12 @@ class NestedAccessor implements NestedAccessorInterface
      * @param array<scalar, mixed>|object $source source to save value to
      * @param array<string> $path nested path
      * @param mixed $value value to save to source
+     * @param bool $append when true append or set
      * @param bool $strict when true throw exception if path not exist in source object
      * @return $this
      * @throws NestedAccessorException
      */
-    protected function _set(&$source, array $path, $value, bool $strict): self
+    protected function _set(&$source, array $path, $value, bool $append, bool $strict): self
     {
         $temp = &$source;
         // let's iterate every path part to go deeper into nesting
@@ -219,7 +230,7 @@ class NestedAccessor implements NestedAccessorInterface
             // go to the next nested level
             if(is_object($temp)) {
                 if($strict && !property_exists($temp, $key)) {
-                    throw NestedAccessorException::createAsCannotSetValue($key);
+                    throw NestedAccessorException::createAsCannotSetValue(implode($this->pathDelimiter, $path));
                 }
                 $temp = &$temp->{$key};
             } else {
@@ -229,9 +240,38 @@ class NestedAccessor implements NestedAccessorInterface
             }
         }
         // now we can save value to the source
-        $temp = $value;
+        if($append) {
+            if(!is_array($temp) || ArrayHelper::isAssoc($temp)) {
+                if($strict) {
+                    throw NestedAccessorException::createAsCannotSetValue(implode($this->pathDelimiter, $path));
+                } elseif(!is_array($temp)) {
+                    $temp = [];
+                }
+            }
+
+            $temp[] = $value;
+        } else {
+            $temp = $value;
+        }
         unset($temp);
 
         return $this;
+    }
+
+    /**
+     * @param string|string[]|null $path
+     * @return string[]
+     */
+    protected function formatPath($path): array
+    {
+        if(is_array($path)) {
+            return $path;
+        }
+
+        if($path === null || $path === '') {
+            return [];
+        }
+
+        return explode($this->pathDelimiter, $path);
     }
 }

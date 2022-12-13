@@ -49,4 +49,13 @@ class NestedArrayStorage implements NestedAccessorInterface
         $this->nestedAccessor->set($path, $value, $strict);
         return $this;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function append($path, $value, bool $strict = true): self
+    {
+        $this->nestedAccessor->append($path, $value, $strict);
+        return $this;
+    }
 }

@@ -60,7 +60,7 @@ class NestedAccessorTest extends \Codeception\Test\Unit
             $this->expectError();
         } catch(NestedAccessorException $e) {
             $this->assertEquals(NestedAccessorException::CANNOT_GET_VALUE, $e->getCode());
-            $this->assertEquals('name1', $e->getData()['key']);
+            $this->assertEquals('name1', $e->getData()['path']);
             $this->assertEquals(1, $e->getData()['count']);
         }
 
@@ -69,7 +69,7 @@ class NestedAccessorTest extends \Codeception\Test\Unit
             $this->expectError();
         } catch(NestedAccessorException $e) {
             $this->assertEquals(NestedAccessorException::CANNOT_GET_VALUE, $e->getCode());
-            $this->assertEquals('name1', $e->getData()['key']);
+            $this->assertEquals('name1', $e->getData()['path']);
             $this->assertEquals(1, $e->getData()['count']);
         }
 
@@ -78,7 +78,7 @@ class NestedAccessorTest extends \Codeception\Test\Unit
             $this->expectError();
         } catch(NestedAccessorException $e) {
             $this->assertEquals(NestedAccessorException::CANNOT_GET_VALUE, $e->getCode());
-            $this->assertEquals('name1', $e->getData()['key']);
+            $this->assertEquals('name1', $e->getData()['path']);
             $this->assertEquals(1, $e->getData()['count']);
         }
 
@@ -94,7 +94,7 @@ class NestedAccessorTest extends \Codeception\Test\Unit
             $this->expectError();
         } catch(NestedAccessorException $e) {
             $this->assertEquals(NestedAccessorException::CANNOT_GET_VALUE, $e->getCode());
-            $this->assertEquals('country.capitals.msk1', $e->getData()['key']);
+            $this->assertEquals('country.capitals.msk1', $e->getData()['path']);
             $this->assertEquals(1, $e->getData()['count']);
         }
     }
@@ -294,7 +294,7 @@ class NestedAccessorTest extends \Codeception\Test\Unit
             $this->expectError();
         } catch(NestedAccessorException $e) {
             $this->assertEquals(NestedAccessorException::CANNOT_GET_VALUE, $e->getCode());
-            $this->assertEquals('countries.cities.extra.codes.value', $e->getData()['key']);
+            $this->assertEquals('countries.cities.extra.codes.value', $e->getData()['path']);
             $this->assertEquals(3, $e->getData()['count']);
         }
     }
@@ -390,7 +390,7 @@ class NestedAccessorTest extends \Codeception\Test\Unit
             $this->expectError();
         } catch(NestedAccessorException $e) {
             $this->assertEquals(NestedAccessorException::CANNOT_SET_VALUE, $e->getCode());
-            $this->assertEquals('f', $e->getData()['key']);
+            $this->assertEquals('test.b.c.f', $e->getData()['path']);
         }
         $this->assertEquals('e', $accessor->get('test.b.c.d'));
         $accessor->set('test.b.c.f', 123, false);
@@ -445,5 +445,72 @@ class NestedAccessorTest extends \Codeception\Test\Unit
             $this->assertEquals(NestedAccessorException::SOURCE_IS_SCALAR, $e->getCode());
             $this->assertEquals('boolean', $e->getData()['source_type']);
         }
+    }
+
+    /**
+     * @return void
+     * @throws NestedAccessorException
+     */
+    public function testAppend()
+    {
+        $source = [
+            'seq_array' => [1, 2],
+            'ass_array' => ['a' => 1, 'b' => 2],
+            'scalar' => 123,
+        ];
+        $na = new NestedAccessor($source);
+
+        $na->append('seq_array', 3);
+        $this->assertEquals([1, 2, 3], $na->get('seq_array'));
+
+        $na->append('seq_array', 5);
+        $this->assertEquals([1, 2, 3, 5], $na->get('seq_array'));
+
+        try {
+            $na->append('ass_array', 11);
+            $this->fail();
+        } catch(NestedAccessorException $e) {
+            $this->assertEquals(NestedAccessorException::CANNOT_SET_VALUE, $e->getCode());
+            $this->assertEquals('ass_array', $e->getData()['path']);
+        }
+
+        $na->append('ass_array', 11, false);
+        $this->assertEquals(['a' => 1, 'b' => 2, 11], $na->get('ass_array'));
+
+        try {
+            $na->append('scalar', 33);
+            $this->fail();
+        } catch(NestedAccessorException $e) {
+            $this->assertEquals(NestedAccessorException::CANNOT_SET_VALUE, $e->getCode());
+            $this->assertEquals('scalar', $e->getData()['path']);
+        }
+
+        $na->append('scalar', 22, false);
+        $this->assertEquals([22], $na->get('scalar'));
+
+        $source = [];
+        $na = new NestedAccessor($source);
+        $na->append('', 1);
+        $na->append(null, 2);
+        $na->append([], 3);
+        $this->assertEquals([1, 2, 3], $na->get(''));
+
+        $source = [
+            'a' => ['b' => [1, 2], 'c' => 5],
+        ];
+        $na = new NestedAccessor($source);
+        $na->append('a.b', 3);
+        $this->assertEquals([1, 2, 3], $na->get('a.b'));
+
+        try {
+            $na->append('a.b.c', 6);
+            $this->fail();
+        } catch(NestedAccessorException $e) {
+            $this->assertEquals(NestedAccessorException::CANNOT_SET_VALUE, $e->getCode());
+            $this->assertEquals('a.b.c', $e->getData()['path']);
+        }
+
+        $na->append('a.b.c', 6, false);
+        $this->assertEquals([6], $na->get('a.b.c'));
     }
 }

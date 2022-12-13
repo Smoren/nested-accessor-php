@@ -33,18 +33,18 @@ class NestedAccessorException extends BaseException
 
     /**
      * Creates a new exception instance for "cannot get value" error
-     * @param string $key path key
+     * @param string $path path key
      * @param int $count errors count
      * @return NestedAccessorException
      */
-    public static function createAsCannotGetValue(string $key, int $count): NestedAccessorException
+    public static function createAsCannotGetValue(string $path, int $count): NestedAccessorException
     {
         return new NestedAccessorException(
-            "cannot get value by key '{$key}'",
+            "cannot get value by path '{$path}'",
             NestedAccessorException::CANNOT_GET_VALUE,
             null,
             [
-                'key' => $key,
+                'path' => $path,
                 'count' => $count,
             ]
         );
@@ -52,17 +52,17 @@ class NestedAccessorException extends BaseException
 
     /**
      * Creates a new exception instance for "cannot set value" error
-     * @param string $key path key
+     * @param string $path path key
      * @return NestedAccessorException
      */
-    public static function createAsCannotSetValue(string $key): NestedAccessorException
+    public static function createAsCannotSetValue(string $path): NestedAccessorException
     {
         return new NestedAccessorException(
-            "cannot set value by key '{$key}'",
+            "cannot set value by path '{$path}'",
             NestedAccessorException::CANNOT_SET_VALUE,
             null,
             [
-                'key' => $key,
+                'path' => $path,
             ]
         );
     }

@@ -27,4 +27,14 @@ interface NestedAccessorInterface
      * @return NestedAccessorInterface this
      */
     public function set($path, $value, bool $strict = true): NestedAccessorInterface;
+
+    /**
+     * Appender of source part specified by nested path
+     * @param string|array<string> $path nested path
+     * @param mixed $value value to save by path
+     * @param bool $strict when true throw exception if path not exist in source object
+     * @return $this
+     * @throws NestedAccessorException
+     */
+    public function append($path, $value, bool $strict = true): NestedAccessorInterface;
 }
