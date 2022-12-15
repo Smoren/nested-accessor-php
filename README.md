@@ -32,6 +32,8 @@ $source = [
     'data' => [
         'id' => 1,
         'name' => 'Countries classifier',
+        'extra' => null,
+        'country_names' => ['Russia', 'Belarus'],
     ],
     'countries' => [
         [
@@ -79,6 +81,20 @@ print_r($accessor->get('countries.name')); // ['Russia', 'Belarus']
 print_r($accessor->get('countries.cities.name')); // ['Moscow', 'Petersburg', 'Minsk']
 print_r($accessor->get('countries.cities.extra.codes.value')); // [7495, 7499, 7812, 375017]
 
+var_dump($accessor->isset('data.name')); // true
+var_dump($accessor->isset('data.extra')); // false
+var_dump($accessor->isset('this.path.not.exist')); // false
+
+var_dump($accessor->exist('data.name')); // true
+var_dump($accessor->exist('data.extra')); // true
+var_dump($accessor->exist('this.path.not.exist')); // false
+
 $accessor->set('data.name', 'New name');
 echo $accessor->get('data.name'); // 'New name'
+
+$accessor->append('data.country_names', 'Mexico');
+echo $accessor->get('data.country_names'); // ['Russia', 'Belarus', 'Mexico']
+
+$accessor->delete('data.name');
+var_dump($accessor->exist('data.name')); // false
 ```

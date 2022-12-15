@@ -118,14 +118,18 @@ class NestedAccessor implements NestedAccessorInterface
      */
     public function delete($path, bool $strict = true): self
     {
+        $path = $this->formatPath($path);
+
         if(!$this->exist($path)) {
             if($strict) {
-                throw NestedAccessorException::createAsCannotSetValue(self::SET_MODE_DELETE, $path);
+                throw NestedAccessorException::createAsCannotSetValue(
+                    self::SET_MODE_DELETE,
+                    implode($this->pathDelimiter, $path)
+                );
             }
             return $this;
         }
 
-        $path = $this->formatPath($path);
         return $this->_set($this->source, $path, null, self::SET_MODE_DELETE, $strict);
     }
 
@@ -298,7 +302,14 @@ class NestedAccessor implements NestedAccessorInterface
                 break;
             case self::SET_MODE_DELETE:
                 if($tempPrevKey === null || (!is_array($tempPrevSource) && !($tempPrevSource instanceof stdClass))) {
-                    throw NestedAccessorException::createAsCannotSetValue($mode, implode($this->pathDelimiter, $path));
+                    if($strict) {
+                        throw NestedAccessorException::createAsCannotSetValue(
+                            $mode,
+                            implode($this->pathDelimiter, $path)
+                        );
+                    } else {
+                        return $this;
+                    }
                 }
                 if(is_array($tempPrevSource)) {
                     unset($tempPrevSource[$tempPrevKey]);

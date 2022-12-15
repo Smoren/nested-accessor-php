@@ -4,7 +4,6 @@ namespace Smoren\NestedAccessor\Factories;
 
 use Smoren\NestedAccessor\Interfaces\NestedAccessorFactoryInterface;
 use Smoren\NestedAccessor\Components\NestedAccessor;
-use Smoren\NestedAccessor\Exceptions\NestedAccessorException;
 use Smoren\NestedAccessor\Interfaces\NestedAccessorInterface;
 
 /**
@@ -16,7 +15,7 @@ class NestedAccessorFactory implements NestedAccessorFactoryInterface
     /**
      * @inheritDoc
      */
-    public static function create(&$source, string $pathDelimiter = '.'): NestedAccessor
+    public static function create(&$source, string $pathDelimiter = '.'): NestedAccessorInterface
     {
         return new NestedAccessor($source, $pathDelimiter);
     }
