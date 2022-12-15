@@ -271,7 +271,7 @@ class NestedAccessor implements NestedAccessorInterface
 
             // go to the next nested level
             if(is_object($temp)) {
-                if($strict && !property_exists($temp, $key)) {
+                if($strict && !($temp instanceof stdClass) && !property_exists($temp, $key)) {
                     throw NestedAccessorException::createAsCannotSetValue($mode, implode($this->pathDelimiter, $path));
                 }
                 $temp = &$temp->{$key};

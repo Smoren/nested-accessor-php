@@ -103,7 +103,7 @@ class SilentNestedAccessorTest extends \Codeception\Test\Unit
         $input = 123;
         try {
             new SilentNestedAccessor($input);
-            $this->expectError();
+            $this->fail();
         } catch(NestedAccessorException $e) {
             $this->assertEquals(NestedAccessorException::SOURCE_IS_SCALAR, $e->getCode());
             $this->assertEquals('integer', $e->getData()['source_type']);
@@ -112,7 +112,7 @@ class SilentNestedAccessorTest extends \Codeception\Test\Unit
         $input = 123.5;
         try {
             new SilentNestedAccessor($input);
-            $this->expectError();
+            $this->fail();
         } catch(NestedAccessorException $e) {
             $this->assertEquals(NestedAccessorException::SOURCE_IS_SCALAR, $e->getCode());
             $this->assertEquals('double', $e->getData()['source_type']);
@@ -121,7 +121,7 @@ class SilentNestedAccessorTest extends \Codeception\Test\Unit
         $input = 'str';
         try {
             new SilentNestedAccessor($input);
-            $this->expectError();
+            $this->fail();
         } catch(NestedAccessorException $e) {
             $this->assertEquals(NestedAccessorException::SOURCE_IS_SCALAR, $e->getCode());
             $this->assertEquals('string', $e->getData()['source_type']);
@@ -130,7 +130,7 @@ class SilentNestedAccessorTest extends \Codeception\Test\Unit
         $input = true;
         try {
             new SilentNestedAccessor($input);
-            $this->expectError();
+            $this->fail();
         } catch(NestedAccessorException $e) {
             $this->assertEquals(NestedAccessorException::SOURCE_IS_SCALAR, $e->getCode());
             $this->assertEquals('boolean', $e->getData()['source_type']);
