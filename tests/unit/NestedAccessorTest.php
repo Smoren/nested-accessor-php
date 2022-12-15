@@ -513,4 +513,44 @@ class NestedAccessorTest extends \Codeception\Test\Unit
         $na->append('a.b.c', 6, false);
         $this->assertEquals([6], $na->get('a.b.c'));
     }
+
+    /**
+     * @return void
+     * @throws NestedAccessorException
+     */
+    public function testExist()
+    {
+        $source = [
+            'test' => ['a' => 1, 'b' => null, 'null' => 2],
+            'null' => 3,
+        ];
+        $na = new NestedAccessor($source);
+        $this->assertTrue($na->exist('test.a'));
+        $this->assertTrue($na->exist('test.b'));
+        $this->assertTrue($na->exist('test.null'));
+        $this->assertTrue($na->exist('null'));
+        $this->assertFalse($na->exist('test.a.b'));
+        $this->assertFalse($na->exist('test.c'));
+        $this->assertFalse($na->exist('null.c'));
+    }
+
+    /**
+     * @return void
+     * @throws NestedAccessorException
+     */
+    public function testIsset()
+    {
+        $source = [
+            'test' => ['a' => 1, 'b' => null, 'null' => 2],
+            'null' => 3,
+        ];
+        $na = new NestedAccessor($source);
+        $this->assertTrue($na->isset('test.a'));
+        $this->assertFalse($na->isset('test.b'));
+        $this->assertTrue($na->isset('test.null'));
+        $this->assertTrue($na->isset('null'));
+        $this->assertFalse($na->isset('test.a.b'));
+        $this->assertFalse($na->isset('test.c'));
+        $this->assertFalse($na->isset('null.c'));
+    }
 }

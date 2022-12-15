@@ -59,6 +59,30 @@ class NestedHelper
     }
 
     /**
+     * Returns true if path exists, false otherwise
+     * @param array<scalar, mixed>|object $source source
+     * @param string|string[] $path nested path
+     * @return bool
+     * @throws NestedAccessorException
+     */
+    public static function exist(&$source, $path): bool
+    {
+        return static::prepareAccessor($source)->exist($path);
+    }
+
+    /**
+     * Returns true if path exists and not null, false otherwise
+     * @param array<scalar, mixed>|object $source source
+     * @param string|string[] $path nested path
+     * @return bool
+     * @throws NestedAccessorException
+     */
+    public static function isset(&$source, $path): bool
+    {
+        return static::prepareAccessor($source)->isset($path);
+    }
+
+    /**
      * Method for preparing accessor to use with source
      * @param array<scalar, mixed>|object $source source data
      * @return NestedAccessor

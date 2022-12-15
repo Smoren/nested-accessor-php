@@ -55,11 +55,7 @@ class NestedAccessor implements NestedAccessorInterface
     }
 
     /**
-     * Getter of source part specified by nested path
-     * @param string|array<string>|null $path nested path
-     * @param bool $strict if true: throw exception when path is not found in source
-     * @return mixed value from source got by nested path
-     * @throws NestedAccessorException if strict mode on and path is not found in source
+     * {@inheritDoc}
      */
     public function get($path = null, bool $strict = true)
     {
@@ -95,12 +91,7 @@ class NestedAccessor implements NestedAccessorInterface
     }
 
     /**
-     * Setter of source part specified by nested path
-     * @param string|array<string> $path nested path
-     * @param mixed $value value to save by path
-     * @param bool $strict when true throw exception if path not exist in source object
-     * @return $this
-     * @throws NestedAccessorException
+     * {@inheritDoc}
      */
     public function set($path, $value, bool $strict = true): self
     {
@@ -109,17 +100,37 @@ class NestedAccessor implements NestedAccessorInterface
     }
 
     /**
-     * Appender of source part specified by nested path
-     * @param string|array<string> $path nested path
-     * @param mixed $value value to save by path
-     * @param bool $strict when true throw exception if path not exist in source object
-     * @return $this
-     * @throws NestedAccessorException
+     * {@inheritDoc}
      */
     public function append($path, $value, bool $strict = true): self
     {
         $path = $this->formatPath($path);
         return $this->_set($this->source, $path, $value, true, $strict);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function exist($path): bool
+    {
+        try {
+            $this->get($path);
+            return true;
+        } catch(NestedAccessorException $e) {
+            return false;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function isset($path): bool
+    {
+        try {
+            return $this->get($path) !== null;
+        } catch(NestedAccessorException $e) {
+            return false;
+        }
     }
 
     /**

@@ -25,6 +25,7 @@ interface NestedAccessorInterface
      * @param mixed $value value to save to source by path
      * @param bool $strict when true throw exception if path not exist in source object
      * @return NestedAccessorInterface this
+     * @throws NestedAccessorException
      */
     public function set($path, $value, bool $strict = true): NestedAccessorInterface;
 
@@ -37,4 +38,18 @@ interface NestedAccessorInterface
      * @throws NestedAccessorException
      */
     public function append($path, $value, bool $strict = true): NestedAccessorInterface;
+
+    /**
+     * Returns true if path exists, false otherwise
+     * @param string|string[] $path nested path
+     * @return bool
+     */
+    public function exist($path): bool;
+
+    /**
+     * Returns true if path exists and not null, false otherwise
+     * @param string|string[] $path nested path
+     * @return bool
+     */
+    public function isset($path): bool;
 }
