@@ -40,6 +40,15 @@ interface NestedAccessorInterface
     public function append($path, $value, bool $strict = true): NestedAccessorInterface;
 
     /**
+     * Deleter of source part specified by nested path
+     * @param string|array<string> $path nested path
+     * @param bool $strict when true throw exception if path not exist in source object
+     * @return $this
+     * @throws NestedAccessorException
+     */
+    public function delete($path, bool $strict = true): self;
+
+    /**
      * Returns true if path exists, false otherwise
      * @param string|string[] $path nested path
      * @return bool

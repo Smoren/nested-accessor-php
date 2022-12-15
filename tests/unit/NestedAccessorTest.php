@@ -470,7 +470,7 @@ class NestedAccessorTest extends \Codeception\Test\Unit
             $na->append('ass_array', 11);
             $this->fail();
         } catch(NestedAccessorException $e) {
-            $this->assertEquals(NestedAccessorException::CANNOT_SET_VALUE, $e->getCode());
+            $this->assertEquals(NestedAccessorException::CANNOT_APPEND_VALUE, $e->getCode());
             $this->assertEquals('ass_array', $e->getData()['path']);
         }
 
@@ -481,7 +481,7 @@ class NestedAccessorTest extends \Codeception\Test\Unit
             $na->append('scalar', 33);
             $this->fail();
         } catch(NestedAccessorException $e) {
-            $this->assertEquals(NestedAccessorException::CANNOT_SET_VALUE, $e->getCode());
+            $this->assertEquals(NestedAccessorException::CANNOT_APPEND_VALUE, $e->getCode());
             $this->assertEquals('scalar', $e->getData()['path']);
         }
 
@@ -506,12 +506,92 @@ class NestedAccessorTest extends \Codeception\Test\Unit
             $na->append('a.b.c', 6);
             $this->fail();
         } catch(NestedAccessorException $e) {
-            $this->assertEquals(NestedAccessorException::CANNOT_SET_VALUE, $e->getCode());
+            $this->assertEquals(NestedAccessorException::CANNOT_APPEND_VALUE, $e->getCode());
             $this->assertEquals('a.b.c', $e->getData()['path']);
         }
 
         $na->append('a.b.c', 6, false);
         $this->assertEquals([6], $na->get('a.b.c'));
+    }
+
+    /**
+     * @return void
+     * @throws NestedAccessorException
+     */
+    public function testDelete()
+    {
+        $source = [
+            'test' => ['a' => 1, 'b' => null, 'null' => 2],
+            'null' => 3,
+        ];
+        $na = new NestedAccessor($source);
+
+        $this->assertEquals(['a' => 1, 'b' => null, 'null' => 2], $na->get('test'));
+        $na->delete('test.a');
+        $this->assertEquals(['b' => null, 'null' => 2], $na->get('test'));
+
+        $na->delete('test.b');
+        $this->assertEquals(['null' => 2], $na->get('test'));
+
+        $na->delete('test');
+        $this->assertEquals(['null' => 3], $na->get(''));
+
+        try {
+            $na->delete('test');
+            $this->fail();
+        } catch(NestedAccessorException $e) {
+            $this->assertEquals(NestedAccessorException::CANNOT_DELETE_VALUE, $e->getCode());
+            $this->assertEquals('test', $e->getData()['path']);
+        }
+        $this->assertEquals(['null' => 3], $na->get(''));
+
+        $na->delete('test', false);
+        $this->assertEquals(['null' => 3], $na->get(''));
+
+        $source = [
+            'test' => (object)['a' => 1, 'b' => null, 'null' => 2],
+            'null' => 3,
+        ];
+        $na = new NestedAccessor($source);
+
+        $this->assertEquals((object)['a' => 1, 'b' => null, 'null' => 2], $na->get('test'));
+        $na->delete('test.a');
+        $this->assertEquals((object)['b' => null, 'null' => 2], $na->get('test'));
+
+        $na->delete('test.b');
+        $this->assertEquals((object)['null' => 2], $na->get('test'));
+
+        $na->delete('test');
+        $this->assertEquals(['null' => 3], $na->get(''));
+
+        $source = [
+            'test' => new class (10) {
+                public int $a;
+
+                public function __construct(int $a)
+                {
+                    $this->a = $a;
+                }
+            },
+            'null' => 3,
+        ];
+        $na = new NestedAccessor($source);
+
+        try {
+            $na->delete('test.a');
+            $this->fail();
+        } catch(NestedAccessorException $e) {
+            $this->assertEquals(NestedAccessorException::CANNOT_DELETE_VALUE, $e->getCode());
+            $this->assertEquals('test.a', $e->getData()['path']);
+        }
+
+        try {
+            $na->delete('test.b');
+            $this->fail();
+        } catch(NestedAccessorException $e) {
+            $this->assertEquals(NestedAccessorException::CANNOT_DELETE_VALUE, $e->getCode());
+            $this->assertEquals('test.b', $e->getData()['path']);
+        }
     }
 
     /**

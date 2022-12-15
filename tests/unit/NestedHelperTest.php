@@ -70,4 +70,38 @@ class NestedHelperTest extends \Codeception\Test\Unit
         $this->assertFalse(NestedHelper::isset($source, 'test.c'));
         $this->assertFalse(NestedHelper::isset($source, 'null.c'));
     }
+
+    /**
+     * @return void
+     * @throws NestedAccessorException
+     */
+    public function testDelete()
+    {
+        $source = [
+            'test' => ['a' => 1, 'b' => null, 'null' => 2],
+            'null' => 3,
+        ];
+
+        $this->assertEquals(['a' => 1, 'b' => null, 'null' => 2], NestedHelper::get($source, 'test'));
+        NestedHelper::delete($source, 'test.a');
+        $this->assertEquals(['b' => null, 'null' => 2], NestedHelper::get($source, 'test'));
+
+        NestedHelper::delete($source, 'test.b');
+        $this->assertEquals(['null' => 2], NestedHelper::get($source, 'test'));
+
+        NestedHelper::delete($source, 'test');
+        $this->assertEquals(['null' => 3], NestedHelper::get($source, ''));
+
+        try {
+            NestedHelper::delete($source, 'test');
+            $this->fail();
+        } catch(NestedAccessorException $e) {
+            $this->assertEquals(NestedAccessorException::CANNOT_DELETE_VALUE, $e->getCode());
+            $this->assertEquals('test', $e->getData()['path']);
+        }
+        $this->assertEquals(['null' => 3], NestedHelper::get($source, ''));
+
+        NestedHelper::delete($source, 'test', false);
+        $this->assertEquals(['null' => 3], NestedHelper::get($source, ''));
+    }
 }

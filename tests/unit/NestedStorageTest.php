@@ -63,4 +63,38 @@ class NestedStorageTest extends \Codeception\Test\Unit
         $this->assertFalse($ns->isset('test.c'));
         $this->assertFalse($ns->isset('null.c'));
     }
+
+    /**
+     * @return void
+     * @throws NestedAccessorException
+     */
+    public function testDelete()
+    {
+        $na = new NestedArrayStorage([
+            'test' => ['a' => 1, 'b' => null, 'null' => 2],
+            'null' => 3,
+        ]);
+
+        $this->assertEquals(['a' => 1, 'b' => null, 'null' => 2], $na->get('test'));
+        $na->delete('test.a');
+        $this->assertEquals(['b' => null, 'null' => 2], $na->get('test'));
+
+        $na->delete('test.b');
+        $this->assertEquals(['null' => 2], $na->get('test'));
+
+        $na->delete('test');
+        $this->assertEquals(['null' => 3], $na->get(''));
+
+        try {
+            $na->delete('test');
+            $this->fail();
+        } catch(NestedAccessorException $e) {
+            $this->assertEquals(NestedAccessorException::CANNOT_DELETE_VALUE, $e->getCode());
+            $this->assertEquals('test', $e->getData()['path']);
+        }
+        $this->assertEquals(['null' => 3], $na->get(''));
+
+        $na->delete('test', false);
+        $this->assertEquals(['null' => 3], $na->get(''));
+    }
 }

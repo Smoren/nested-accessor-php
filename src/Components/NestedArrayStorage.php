@@ -62,6 +62,15 @@ class NestedArrayStorage implements NestedAccessorInterface
     /**
      * {@inheritDoc}
      */
+    public function delete($path, bool $strict = true): NestedAccessorInterface
+    {
+        $this->nestedAccessor->delete($path, $strict);
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function exist($path): bool
     {
         return $this->nestedAccessor->exist($path);

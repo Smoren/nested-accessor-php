@@ -5,6 +5,7 @@ namespace Smoren\NestedAccessor\Components;
 use Smoren\NestedAccessor\Helpers\ArrayHelper;
 use Smoren\NestedAccessor\Interfaces\NestedAccessorInterface;
 use Smoren\NestedAccessor\Exceptions\NestedAccessorException;
+use stdClass;
 
 /**
  * Accessor class for getting and setting to source array or object with nested keys
@@ -12,6 +13,10 @@ use Smoren\NestedAccessor\Exceptions\NestedAccessorException;
  */
 class NestedAccessor implements NestedAccessorInterface
 {
+    public const SET_MODE_SET = 1;
+    public const SET_MODE_APPEND = 2;
+    public const SET_MODE_DELETE = 3;
+
     /**
      * @var array<int|string, mixed>|object data source for accessing
      */
@@ -96,7 +101,7 @@ class NestedAccessor implements NestedAccessorInterface
     public function set($path, $value, bool $strict = true): self
     {
         $path = $this->formatPath($path);
-        return $this->_set($this->source, $path, $value, false, $strict);
+        return $this->_set($this->source, $path, $value, self::SET_MODE_SET, $strict);
     }
 
     /**
@@ -105,7 +110,23 @@ class NestedAccessor implements NestedAccessorInterface
     public function append($path, $value, bool $strict = true): self
     {
         $path = $this->formatPath($path);
-        return $this->_set($this->source, $path, $value, true, $strict);
+        return $this->_set($this->source, $path, $value, self::SET_MODE_APPEND, $strict);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function delete($path, bool $strict = true): self
+    {
+        if(!$this->exist($path)) {
+            if($strict) {
+                throw NestedAccessorException::createAsCannotSetValue(self::SET_MODE_DELETE, $path);
+            }
+            return $this;
+        }
+
+        $path = $this->formatPath($path);
+        return $this->_set($this->source, $path, null, self::SET_MODE_DELETE, $strict);
     }
 
     /**
@@ -223,25 +244,31 @@ class NestedAccessor implements NestedAccessorInterface
      * @param array<scalar, mixed>|object $source source to save value to
      * @param array<string> $path nested path
      * @param mixed $value value to save to source
-     * @param bool $append when true append or set
+     * @param int $mode when true append or set
      * @param bool $strict when true throw exception if path not exist in source object
      * @return $this
      * @throws NestedAccessorException
      */
-    protected function _set(&$source, array $path, $value, bool $append, bool $strict): self
+    protected function _set(&$source, array $path, $value, int $mode, bool $strict): self
     {
         $temp = &$source;
+        $tempPrevSource = null;
+        $tempPrevKey = null;
+
         // let's iterate every path part to go deeper into nesting
         foreach($path as $key) {
             if(isset($temp) && is_scalar($temp)) {
-                // value in the middle of the path must me an array
+                // value in the middle of the path must be an array
                 $temp = [];
             }
+
+            $tempPrevSource = &$temp;
+            $tempPrevKey = $key;
 
             // go to the next nested level
             if(is_object($temp)) {
                 if($strict && !property_exists($temp, $key)) {
-                    throw NestedAccessorException::createAsCannotSetValue(implode($this->pathDelimiter, $path));
+                    throw NestedAccessorException::createAsCannotSetValue($mode, implode($this->pathDelimiter, $path));
                 }
                 $temp = &$temp->{$key};
             } else {
@@ -251,18 +278,34 @@ class NestedAccessor implements NestedAccessorInterface
             }
         }
         // now we can save value to the source
-        if($append) {
-            if(!is_array($temp) || ArrayHelper::isAssoc($temp)) {
-                if($strict) {
-                    throw NestedAccessorException::createAsCannotSetValue(implode($this->pathDelimiter, $path));
-                } elseif(!is_array($temp)) {
-                    $temp = [];
+        switch($mode) {
+            case self::SET_MODE_SET:
+                $temp = $value;
+                break;
+            case self::SET_MODE_APPEND:
+                if(!is_array($temp) || ArrayHelper::isAssoc($temp)) {
+                    if($strict) {
+                        throw NestedAccessorException::createAsCannotSetValue(
+                            $mode,
+                            implode($this->pathDelimiter, $path)
+                        );
+                    } elseif(!is_array($temp)) {
+                        $temp = [];
+                    }
                 }
-            }
 
-            $temp[] = $value;
-        } else {
-            $temp = $value;
+                $temp[] = $value;
+                break;
+            case self::SET_MODE_DELETE:
+                if($tempPrevKey === null || (!is_array($tempPrevSource) && !($tempPrevSource instanceof stdClass))) {
+                    throw NestedAccessorException::createAsCannotSetValue($mode, implode($this->pathDelimiter, $path));
+                }
+                if(is_array($tempPrevSource)) {
+                    unset($tempPrevSource[$tempPrevKey]);
+                } else {
+                    unset($tempPrevSource->{$tempPrevKey});
+                }
+                break;
         }
         unset($temp);
 

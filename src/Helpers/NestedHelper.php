@@ -43,7 +43,6 @@ class NestedHelper
         static::prepareAccessor($source)->set($path, $value, $strict);
     }
 
-
     /**
      * Appends value to nested source by given path
      * @param array<scalar, mixed>|object $source source
@@ -56,6 +55,19 @@ class NestedHelper
     public static function append(&$source, $path, $value, bool $strict = true): void
     {
         static::prepareAccessor($source)->append($path, $value, $strict);
+    }
+
+    /**
+     * Deletes value to nested source by given path
+     * @param array<scalar, mixed>|object $source source
+     * @param string|array<string> $path path e.g. 'path.to.value' or ['path', 'to', 'value']
+     * @param bool $strict if true: throw exception when path is not found in source
+     * @return void
+     * @throws NestedAccessorException
+     */
+    public static function delete(&$source, $path, bool $strict = true): void
+    {
+        static::prepareAccessor($source)->delete($path, $strict);
     }
 
     /**
