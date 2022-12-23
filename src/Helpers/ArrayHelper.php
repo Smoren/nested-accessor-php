@@ -15,9 +15,6 @@ class ArrayHelper
      */
     public static function isAssoc(array $input): bool
     {
-        if([] === $input) {
-            return false;
-        }
-        return array_keys($input) !== range(0, count($input) - 1);
+        return (array_values($input) !== $input);
     }
 }
