@@ -148,6 +148,116 @@ class NestedAccessorTest extends \Codeception\Test\Unit
 
         $accessor = new NestedAccessor($source);
         $this->assertEquals(-5, $accessor->get('myProp'));
+
+        $source = new class(5) {
+            protected int $myProp;
+
+            public function __construct(int $myProp)
+            {
+                $this->myProp = $myProp;
+            }
+
+            protected function getMyProp(): int
+            {
+                return -$this->myProp;
+            }
+        };
+
+        $accessor = new NestedAccessor($source);
+        try {
+            $accessor->get('myProp');
+            $this->fail();
+        } catch(NestedAccessorException $e) {
+            $this->assertEquals("cannot get value by path 'myProp'", $e->getMessage());
+        }
+
+        $source = new class(5) {
+            private int $myProp;
+
+            public function __construct(int $myProp)
+            {
+                $this->myProp = $myProp;
+            }
+
+            private function getMyProp(): int
+            {
+                return -$this->myProp;
+            }
+        };
+
+        $accessor = new NestedAccessor($source);
+        try {
+            $accessor->get('myProp');
+            $this->fail();
+        } catch(NestedAccessorException $e) {
+            $this->assertEquals("cannot get value by path 'myProp'", $e->getMessage());
+        }
+    }
+
+    public function testReadFromClassObjectProperty()
+    {
+        $source = new class (10) {
+            public int $a;
+
+            public function __construct(int $a)
+            {
+                $this->a = $a;
+            }
+        };
+
+        $accessor = new NestedAccessor($source);
+        $this->assertEquals(10, $accessor->get('a'));
+
+        $source = new class (10) {
+            public int $a;
+
+            public function __construct(int $a)
+            {
+                $this->a = $a;
+            }
+
+            protected function getA()
+            {
+                return $this->a;
+            }
+        };
+
+        $accessor = new NestedAccessor($source);
+        $this->assertEquals(10, $accessor->get('a'));
+
+        $source = new class (10) {
+            protected int $a;
+
+            public function __construct(int $a)
+            {
+                $this->a = $a;
+            }
+        };
+
+        $accessor = new NestedAccessor($source);
+        try {
+            $accessor->get('a');
+            $this->fail();
+        } catch(NestedAccessorException $e) {
+            $this->assertEquals("cannot get value by path 'a'", $e->getMessage());
+        }
+
+        $source = new class (10) {
+            private int $a;
+
+            public function __construct(int $a)
+            {
+                $this->a = $a;
+            }
+        };
+
+        $accessor = new NestedAccessor($source);
+        try {
+            $accessor->get('a');
+            $this->fail();
+        } catch(NestedAccessorException $e) {
+            $this->assertEquals("cannot get value by path 'a'", $e->getMessage());
+        }
     }
 
     /**

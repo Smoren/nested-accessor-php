@@ -3,6 +3,7 @@
 namespace Smoren\NestedAccessor\Components;
 
 use Smoren\NestedAccessor\Helpers\ArrayHelper;
+use Smoren\NestedAccessor\Helpers\ObjectHelper;
 use Smoren\NestedAccessor\Interfaces\NestedAccessorInterface;
 use Smoren\NestedAccessor\Exceptions\NestedAccessorException;
 use stdClass;
@@ -195,11 +196,10 @@ class NestedAccessor implements NestedAccessorInterface
                 // go to the next nested level
                 $source = $source[$key];
             } elseif(is_object($source)) {
-                $getterName = 'get'.ucfirst($key);
-                if(method_exists($source, $getterName)) {
+                if(ObjectHelper::hasPropertyAccessibleByGetter($source, $key)) {
                     // go to the next nested level
-                    $source = $source->{$getterName}();
-                } elseif(property_exists($source, $key)) {
+                    $source = ObjectHelper::getPropertyByGetter($source, $key);
+                } elseif(ObjectHelper::hasPublicProperty($source, $key)) {
                     // go to the next nested level
                     $source = $source->{$key};
                 } else {
@@ -271,7 +271,7 @@ class NestedAccessor implements NestedAccessorInterface
 
             // go to the next nested level
             if(is_object($temp)) {
-                if($strict && !($temp instanceof stdClass) && !property_exists($temp, $key)) {
+                if($strict && !($temp instanceof stdClass) && !ObjectHelper::hasPublicProperty($temp, $key)) {
                     throw NestedAccessorException::createAsCannotSetValue($mode, implode($this->pathDelimiter, $path));
                 }
                 $temp = &$temp->{$key};
