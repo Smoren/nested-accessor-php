@@ -3,6 +3,7 @@
 namespace Smoren\NestedAccessor\Components;
 
 use Smoren\NestedAccessor\Helpers\ArrayHelper;
+use Smoren\NestedAccessor\Helpers\KeyAccessHelper;
 use Smoren\NestedAccessor\Helpers\ObjectHelper;
 use Smoren\NestedAccessor\Interfaces\NestedAccessorInterface;
 use Smoren\NestedAccessor\Exceptions\NestedAccessorException;
@@ -186,30 +187,11 @@ class NestedAccessor implements NestedAccessorInterface
 
             $key = array_pop($path);
 
-            if(is_array($source)) {
-                if(!array_key_exists($key, $source)) {
-                    // path part key is missing in source array
-                    $errorsCount++;
-                    // we cannot go deeper
-                    return;
-                }
+            if(KeyAccessHelper::exists($source, $key)) {
                 // go to the next nested level
-                $source = $source[$key];
-            } elseif(is_object($source)) {
-                if(ObjectHelper::hasPropertyAccessibleByGetter($source, $key)) {
-                    // go to the next nested level
-                    $source = ObjectHelper::getPropertyByGetter($source, $key);
-                } elseif(ObjectHelper::hasPublicProperty($source, $key)) {
-                    // go to the next nested level
-                    $source = $source->{$key};
-                } else {
-                    // path part key is missing in source object
-                    $errorsCount++;
-                    // we cannot go deeper
-                    return;
-                }
+                $source = KeyAccessHelper::get($source, $key);
             } else {
-                // source is scalar, so we can't go to the next depth level
+                // path part key is missing in source object
                 $errorsCount++;
                 // we cannot go deeper
                 return;
@@ -217,6 +199,7 @@ class NestedAccessor implements NestedAccessorInterface
 
             // when it's not the last iteration of the stack
             // and the source is non-associative array (list)
+            /** @var mixed $source */
             if(count($path) && is_array($source) && !ArrayHelper::isAssoc($source)) {
                 // the result will be multiple
                 if(!is_array($result)) {
