@@ -3,10 +3,10 @@
 namespace Smoren\NestedAccessor\Components;
 
 use Smoren\NestedAccessor\Helpers\ArrayHelper;
-use Smoren\NestedAccessor\Helpers\KeyAccessHelper;
-use Smoren\NestedAccessor\Helpers\ObjectHelper;
 use Smoren\NestedAccessor\Interfaces\NestedAccessorInterface;
 use Smoren\NestedAccessor\Exceptions\NestedAccessorException;
+use Smoren\TypeTools\MapAccessor;
+use Smoren\TypeTools\ObjectAccessor;
 use stdClass;
 
 /**
@@ -187,9 +187,9 @@ class NestedAccessor implements NestedAccessorInterface
 
             $key = array_pop($path);
 
-            if(KeyAccessHelper::exists($source, $key)) {
+            if(MapAccessor::exists($source, $key)) {
                 // go to the next nested level
-                $source = KeyAccessHelper::get($source, $key);
+                $source = MapAccessor::get($source, $key);
             } else {
                 // path part key is missing in source object
                 $errorsCount++;
@@ -254,7 +254,7 @@ class NestedAccessor implements NestedAccessorInterface
 
             // go to the next nested level
             if(is_object($temp)) {
-                if($strict && !($temp instanceof stdClass) && !ObjectHelper::hasPublicProperty($temp, $key)) {
+                if($strict && !($temp instanceof stdClass) && !ObjectAccessor::hasPublicProperty($temp, $key)) {
                     throw NestedAccessorException::createAsCannotSetValue($mode, implode($this->pathDelimiter, $path));
                 }
                 $temp = &$temp->{$key};
