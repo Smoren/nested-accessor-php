@@ -270,40 +270,72 @@ class NestedAccessor implements NestedAccessorInterface
                 $temp = $value;
                 break;
             case self::SET_MODE_APPEND:
-                if(!is_array($temp) || ArrayHelper::isAssoc($temp)) {
-                    if($strict) {
-                        throw NestedAccessorException::createAsCannotSetValue(
-                            $mode,
-                            implode($this->pathDelimiter, $path)
-                        );
-                    } elseif(!is_array($temp)) {
-                        $temp = [];
-                    }
-                }
-
-                $temp[] = $value;
+                $this->_append($temp, $value, $path, $strict);
                 break;
             case self::SET_MODE_DELETE:
-                if($tempPrevKey === null || (!is_array($tempPrevSource) && !($tempPrevSource instanceof stdClass))) {
-                    if($strict) {
-                        throw NestedAccessorException::createAsCannotSetValue(
-                            $mode,
-                            implode($this->pathDelimiter, $path)
-                        );
-                    } else {
-                        return $this;
-                    }
-                }
-                if(is_array($tempPrevSource)) {
-                    unset($tempPrevSource[$tempPrevKey]);
-                } else {
-                    unset($tempPrevSource->{$tempPrevKey});
+                if(!$this->_delete($tempPrevSource, $tempPrevKey, $path, $strict)) {
+                    return $this;
                 }
                 break;
         }
         unset($temp);
 
         return $this;
+    }
+
+    /**
+     * Appends value to source.
+     * @param mixed $source source to append value to
+     * @param mixed $value value to append to source
+     * @param array<string> $path nested path
+     * @param bool $strict if true: throw exception when cannot append value
+     * @return void
+     * @throws NestedAccessorException if cannot append item to source (in strict mode only)
+     */
+    protected function _append(&$source, $value, array $path, bool $strict): void
+    {
+        if(!is_array($source) || ArrayHelper::isAssoc($source)) {
+            if($strict) {
+                throw NestedAccessorException::createAsCannotSetValue(
+                    self::SET_MODE_APPEND,
+                    implode($this->pathDelimiter, $path)
+                );
+            } elseif(!is_array($source)) {
+                $source = [];
+            }
+        }
+
+        $source[] = $value;
+    }
+
+    /**
+     * Removes item from source.
+     * @param mixed $source source to remove item from
+     * @param string|null $key key to remove item from source by
+     * @param array<string> $path nested path
+     * @param bool $strict if true: throw exception when cannot remove item
+     * @return bool true if removing is succeeded
+     * @throws NestedAccessorException if item to remove is not exists (in strict mode only)
+     */
+    protected function _delete(&$source, $key, array $path, bool $strict): bool
+    {
+        if($key === null || (!is_array($source) && !($source instanceof stdClass))) {
+            if($strict) {
+                throw NestedAccessorException::createAsCannotSetValue(
+                    self::SET_MODE_DELETE,
+                    implode($this->pathDelimiter, $path)
+                );
+            } else {
+                return false;
+            }
+        }
+        if(is_array($source)) {
+            unset($source[$key]);
+        } else {
+            unset($source->{$key});
+        }
+
+        return true;
     }
 
     /**
