@@ -3,7 +3,7 @@
 namespace Smoren\NestedAccessor\Tests\Unit;
 
 use Smoren\NestedAccessor\Exceptions\NestedAccessorException;
-use Smoren\NestedAccessor\Helpers\NestedHelper;
+use Smoren\NestedAccessor\Helpers\NestedAccess;
 
 class NestedHelperTest extends \Codeception\Test\Unit
 {
@@ -16,21 +16,21 @@ class NestedHelperTest extends \Codeception\Test\Unit
         $source = [
             'a' => ['b' => [['c' => 1], ['c' => 2]]],
         ];
-        $this->assertEquals([1, 2], NestedHelper::get($source, ['a', 'b', 'c']));
-        NestedHelper::set($source, ['a', 'd'], 22);
-        $this->assertEquals([1, 2], NestedHelper::get($source, ['a', 'b', 'c']));
-        $this->assertEquals(22, NestedHelper::get($source, ['a', 'd']));
+        $this->assertEquals([1, 2], NestedAccess::get($source, ['a', 'b', 'c']));
+        NestedAccess::set($source, ['a', 'd'], 22);
+        $this->assertEquals([1, 2], NestedAccess::get($source, ['a', 'b', 'c']));
+        $this->assertEquals(22, NestedAccess::get($source, ['a', 'd']));
 
         $source = [
             'test' => ['value' => 123],
         ];
-        $this->assertEquals(123, NestedHelper::get($source, ['test', 'value']));
-        $this->assertEquals(123, NestedHelper::get($source, 'test.value'));
-        $this->assertEquals(null, NestedHelper::get($source, 'unknown.value', false));
+        $this->assertEquals(123, NestedAccess::get($source, ['test', 'value']));
+        $this->assertEquals(123, NestedAccess::get($source, 'test.value'));
+        $this->assertEquals(null, NestedAccess::get($source, 'unknown.value', false));
 
         $source = ['test' => [1, 2]];
-        NestedHelper::append($source, ['test'], 3);
-        $this->assertEquals([1, 2, 3], NestedHelper::get($source, ['test']));
+        NestedAccess::append($source, ['test'], 3);
+        $this->assertEquals([1, 2, 3], NestedAccess::get($source, ['test']));
     }
 
     /**
@@ -43,13 +43,13 @@ class NestedHelperTest extends \Codeception\Test\Unit
             'test' => ['a' => 1, 'b' => null, 'null' => 2],
             'null' => 3,
         ];
-        $this->assertTrue(NestedHelper::exist($source, 'test.a'));
-        $this->assertTrue(NestedHelper::exist($source, 'test.b'));
-        $this->assertTrue(NestedHelper::exist($source, 'test.null'));
-        $this->assertTrue(NestedHelper::exist($source, 'null'));
-        $this->assertFalse(NestedHelper::exist($source, 'test.a.b'));
-        $this->assertFalse(NestedHelper::exist($source, 'test.c'));
-        $this->assertFalse(NestedHelper::exist($source, 'null.c'));
+        $this->assertTrue(NestedAccess::exist($source, 'test.a'));
+        $this->assertTrue(NestedAccess::exist($source, 'test.b'));
+        $this->assertTrue(NestedAccess::exist($source, 'test.null'));
+        $this->assertTrue(NestedAccess::exist($source, 'null'));
+        $this->assertFalse(NestedAccess::exist($source, 'test.a.b'));
+        $this->assertFalse(NestedAccess::exist($source, 'test.c'));
+        $this->assertFalse(NestedAccess::exist($source, 'null.c'));
     }
 
     /**
@@ -62,13 +62,13 @@ class NestedHelperTest extends \Codeception\Test\Unit
             'test' => ['a' => 1, 'b' => null, 'null' => 2],
             'null' => 3,
         ];
-        $this->assertTrue(NestedHelper::isset($source, 'test.a'));
-        $this->assertFalse(NestedHelper::isset($source, 'test.b'));
-        $this->assertTrue(NestedHelper::isset($source, 'test.null'));
-        $this->assertTrue(NestedHelper::isset($source, 'null'));
-        $this->assertFalse(NestedHelper::isset($source, 'test.a.b'));
-        $this->assertFalse(NestedHelper::isset($source, 'test.c'));
-        $this->assertFalse(NestedHelper::isset($source, 'null.c'));
+        $this->assertTrue(NestedAccess::isset($source, 'test.a'));
+        $this->assertFalse(NestedAccess::isset($source, 'test.b'));
+        $this->assertTrue(NestedAccess::isset($source, 'test.null'));
+        $this->assertTrue(NestedAccess::isset($source, 'null'));
+        $this->assertFalse(NestedAccess::isset($source, 'test.a.b'));
+        $this->assertFalse(NestedAccess::isset($source, 'test.c'));
+        $this->assertFalse(NestedAccess::isset($source, 'null.c'));
     }
 
     /**
@@ -82,26 +82,26 @@ class NestedHelperTest extends \Codeception\Test\Unit
             'null' => 3,
         ];
 
-        $this->assertEquals(['a' => 1, 'b' => null, 'null' => 2], NestedHelper::get($source, 'test'));
-        NestedHelper::delete($source, 'test.a');
-        $this->assertEquals(['b' => null, 'null' => 2], NestedHelper::get($source, 'test'));
+        $this->assertEquals(['a' => 1, 'b' => null, 'null' => 2], NestedAccess::get($source, 'test'));
+        NestedAccess::delete($source, 'test.a');
+        $this->assertEquals(['b' => null, 'null' => 2], NestedAccess::get($source, 'test'));
 
-        NestedHelper::delete($source, 'test.b');
-        $this->assertEquals(['null' => 2], NestedHelper::get($source, 'test'));
+        NestedAccess::delete($source, 'test.b');
+        $this->assertEquals(['null' => 2], NestedAccess::get($source, 'test'));
 
-        NestedHelper::delete($source, 'test');
-        $this->assertEquals(['null' => 3], NestedHelper::get($source, ''));
+        NestedAccess::delete($source, 'test');
+        $this->assertEquals(['null' => 3], NestedAccess::get($source, ''));
 
         try {
-            NestedHelper::delete($source, 'test');
+            NestedAccess::delete($source, 'test');
             $this->fail();
         } catch(NestedAccessorException $e) {
             $this->assertEquals(NestedAccessorException::CANNOT_DELETE_VALUE, $e->getCode());
             $this->assertEquals('test', $e->getData()['path']);
         }
-        $this->assertEquals(['null' => 3], NestedHelper::get($source, ''));
+        $this->assertEquals(['null' => 3], NestedAccess::get($source, ''));
 
-        NestedHelper::delete($source, 'test', false);
-        $this->assertEquals(['null' => 3], NestedHelper::get($source, ''));
+        NestedAccess::delete($source, 'test', false);
+        $this->assertEquals(['null' => 3], NestedAccess::get($source, ''));
     }
 }
