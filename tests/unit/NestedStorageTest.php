@@ -19,7 +19,7 @@ class NestedStorageTest extends \Codeception\Test\Unit
         $this->assertEquals([1, 2], $ns->get(['a', 'b', 'c']));
         $ns->set(['a', 'd'], 22);
         $this->assertEquals([1, 2], $ns->get(['a', 'b', 'c']));
-        $this->assertEquals(22, $ns->get(['a', 'd']));
+        $this->assertSame(22, $ns->get(['a', 'd']));
 
         $ns = new NestedArrayStorage(['test' => [1, 2]]);
         $ns->append('test', 3);
@@ -89,8 +89,8 @@ class NestedStorageTest extends \Codeception\Test\Unit
             $na->delete('test');
             $this->fail();
         } catch(NestedAccessorException $e) {
-            $this->assertEquals(NestedAccessorException::CANNOT_DELETE_VALUE, $e->getCode());
-            $this->assertEquals('test', $e->getData()['path']);
+            $this->assertSame(NestedAccessorException::CANNOT_DELETE_VALUE, $e->getCode());
+            $this->assertSame('test', $e->getData()['path']);
         }
         $this->assertEquals(['null' => 3], $na->get(''));
 

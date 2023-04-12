@@ -16,14 +16,14 @@ class NestedFactoryTest extends \Codeception\Test\Unit
     {
         $sourceArray = ['test' => 1];
         $na = NestedAccessorFactory::create($sourceArray);
-        $this->assertEquals(1, $na->get('test'));
+        $this->assertSame(1, $na->get('test'));
 
         $na = NestedAccessorFactory::fromArray($sourceArray);
-        $this->assertEquals(1, $na->get('test'));
+        $this->assertSame(1, $na->get('test'));
 
         $sourceObject = (object)$sourceArray;
         $na = NestedAccessorFactory::fromObject($sourceObject);
-        $this->assertEquals(1, $na->get('test'));
+        $this->assertSame(1, $na->get('test'));
     }
 
     /**
@@ -34,13 +34,13 @@ class NestedFactoryTest extends \Codeception\Test\Unit
     {
         $sourceArray = ['test' => 1];
         $na = SilentNestedAccessorFactory::create($sourceArray);
-        $this->assertEquals(1, $na->get('test'));
+        $this->assertSame(1, $na->get('test'));
 
         $na = SilentNestedAccessorFactory::fromArray($sourceArray);
-        $this->assertEquals(1, $na->get('test'));
+        $this->assertSame(1, $na->get('test'));
 
         $sourceObject = (object)$sourceArray;
         $na = SilentNestedAccessorFactory::fromObject($sourceObject);
-        $this->assertEquals(1, $na->get('test'));
+        $this->assertSame(1, $na->get('test'));
     }
 }

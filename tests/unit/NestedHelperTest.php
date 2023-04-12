@@ -19,14 +19,14 @@ class NestedHelperTest extends \Codeception\Test\Unit
         $this->assertEquals([1, 2], NestedAccess::get($source, ['a', 'b', 'c']));
         NestedAccess::set($source, ['a', 'd'], 22);
         $this->assertEquals([1, 2], NestedAccess::get($source, ['a', 'b', 'c']));
-        $this->assertEquals(22, NestedAccess::get($source, ['a', 'd']));
+        $this->assertSame(22, NestedAccess::get($source, ['a', 'd']));
 
         $source = [
             'test' => ['value' => 123],
         ];
-        $this->assertEquals(123, NestedAccess::get($source, ['test', 'value']));
-        $this->assertEquals(123, NestedAccess::get($source, 'test.value'));
-        $this->assertEquals(null, NestedAccess::get($source, 'unknown.value', false));
+        $this->assertSame(123, NestedAccess::get($source, ['test', 'value']));
+        $this->assertSame(123, NestedAccess::get($source, 'test.value'));
+        $this->assertNull(NestedAccess::get($source, 'unknown.value', false));
 
         $source = ['test' => [1, 2]];
         NestedAccess::append($source, ['test'], 3);
@@ -96,8 +96,8 @@ class NestedHelperTest extends \Codeception\Test\Unit
             NestedAccess::delete($source, 'test');
             $this->fail();
         } catch(NestedAccessorException $e) {
-            $this->assertEquals(NestedAccessorException::CANNOT_DELETE_VALUE, $e->getCode());
-            $this->assertEquals('test', $e->getData()['path']);
+            $this->assertSame(NestedAccessorException::CANNOT_DELETE_VALUE, $e->getCode());
+            $this->assertSame('test', $e->getData()['path']);
         }
         $this->assertEquals(['null' => 3], NestedAccess::get($source, ''));
 

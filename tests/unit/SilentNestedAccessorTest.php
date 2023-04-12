@@ -48,11 +48,10 @@ class SilentNestedAccessorTest extends \Codeception\Test\Unit
 
         $accessor = new SilentNestedAccessor($input);
 
-        $this->assertEquals('Novgorod', $accessor->get('name'));
-        $this->assertEquals('Novgorod', $accessor->get(['name']));
-        $this->assertEquals('Novgorod', $accessor->get('name'));
-        $this->assertEquals(null, $accessor->get('status'));
-        $this->assertEquals(null, $accessor->get('name1'));
+        $this->assertSame('Novgorod', $accessor->get('name'));
+        $this->assertSame('Novgorod', $accessor->get(['name']));
+        $this->assertNull($accessor->get('status'));
+        $this->assertNull($accessor->get('name1'));
     }
 
     /**
@@ -72,24 +71,24 @@ class SilentNestedAccessorTest extends \Codeception\Test\Unit
         $accessor->set('test.b.a', 33);
         $this->assertEquals(['a' => 33], $accessor->get('test.b'));
         $accessor->set('test.b.c', ['d' => 'e']);
-        $this->assertEquals('e', $accessor->get('test.b.c.d'));
+        $this->assertSame('e', $accessor->get('test.b.c.d'));
         $accessor->set('test.b', 0);
-        $this->assertEquals(0, $accessor->get('test.b'));
-        $this->assertEquals(null, $accessor->get('test.b.c.d', false));
+        $this->assertSame(0, $accessor->get('test.b'));
+        $this->assertNull($accessor->get('test.b.c.d', false));
         $accessor->set('test.b.c', (object)['d' => 'e']);
         $this->assertEquals((object)['d' => 'e'], $accessor->get('test.b.c', false));
 
         // silent skip
         $accessor->set('test.b.c.f', 123);
 
-        $this->assertEquals('e', $accessor->get('test.b.c.d'));
+        $this->assertSame('e', $accessor->get('test.b.c.d'));
         $accessor->set('test.b.c.f', 123, false);
-        $this->assertEquals(123, $accessor->get('test.b.c.f'));
+        $this->assertSame(123, $accessor->get('test.b.c.f'));
         $this->assertEquals(['a' => 1, 'b' => 2], $accessor->get('test.a'));
 
         $input = ['a' => 1];
         $accessor = new SilentNestedAccessor($input);
-        $this->assertEquals(1, $accessor->get('a'));
+        $this->assertSame(1, $accessor->get('a'));
         $this->assertEquals(['a' => 1], $accessor->get());
         $this->assertEquals(['a' => 1], $accessor->get(''));
         $accessor->set('a.b', 22);
@@ -105,8 +104,8 @@ class SilentNestedAccessorTest extends \Codeception\Test\Unit
             new SilentNestedAccessor($input);
             $this->fail();
         } catch(NestedAccessorException $e) {
-            $this->assertEquals(NestedAccessorException::SOURCE_IS_SCALAR, $e->getCode());
-            $this->assertEquals('integer', $e->getData()['source_type']);
+            $this->assertSame(NestedAccessorException::SOURCE_IS_SCALAR, $e->getCode());
+            $this->assertSame('integer', $e->getData()['source_type']);
         }
 
         $input = 123.5;
@@ -114,8 +113,8 @@ class SilentNestedAccessorTest extends \Codeception\Test\Unit
             new SilentNestedAccessor($input);
             $this->fail();
         } catch(NestedAccessorException $e) {
-            $this->assertEquals(NestedAccessorException::SOURCE_IS_SCALAR, $e->getCode());
-            $this->assertEquals('double', $e->getData()['source_type']);
+            $this->assertSame(NestedAccessorException::SOURCE_IS_SCALAR, $e->getCode());
+            $this->assertSame('double', $e->getData()['source_type']);
         }
 
         $input = 'str';
@@ -123,8 +122,8 @@ class SilentNestedAccessorTest extends \Codeception\Test\Unit
             new SilentNestedAccessor($input);
             $this->fail();
         } catch(NestedAccessorException $e) {
-            $this->assertEquals(NestedAccessorException::SOURCE_IS_SCALAR, $e->getCode());
-            $this->assertEquals('string', $e->getData()['source_type']);
+            $this->assertSame(NestedAccessorException::SOURCE_IS_SCALAR, $e->getCode());
+            $this->assertSame('string', $e->getData()['source_type']);
         }
 
         $input = true;
@@ -132,8 +131,8 @@ class SilentNestedAccessorTest extends \Codeception\Test\Unit
             new SilentNestedAccessor($input);
             $this->fail();
         } catch(NestedAccessorException $e) {
-            $this->assertEquals(NestedAccessorException::SOURCE_IS_SCALAR, $e->getCode());
-            $this->assertEquals('boolean', $e->getData()['source_type']);
+            $this->assertSame(NestedAccessorException::SOURCE_IS_SCALAR, $e->getCode());
+            $this->assertSame('boolean', $e->getData()['source_type']);
         }
     }
 
@@ -238,7 +237,7 @@ class SilentNestedAccessorTest extends \Codeception\Test\Unit
         $na->delete('test.a');
         $na->delete('test.b');
 
-        $this->assertEquals(10, $source['test']->a);
+        $this->assertSame(10, $source['test']->a);
     }
 
     /**
