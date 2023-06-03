@@ -55,6 +55,19 @@ class NestedAccessorTest extends \Codeception\Test\Unit
 
         $this->assertNull($accessor->get('name1', false));
 
+        $this->assertSame('Tverskaya', $accessor->get('streets.0.name'));
+        $this->assertSame('Leninskiy', $accessor->get('streets.1.name'));
+        $this->assertSame('Tarusskaya', $accessor->get('streets.2.name'));
+
+        try {
+            $accessor->get('streets.3.name');
+            $this->fail();
+        } catch(NestedAccessorException $e) {
+            $this->assertSame(NestedAccessorException::CANNOT_GET_VALUE, $e->getCode());
+            $this->assertSame('streets.3.name', $e->getData()['path']);
+            $this->assertSame(1, $e->getData()['count']);
+        }
+
         try {
             $accessor->get('name1', true);
             $this->fail();

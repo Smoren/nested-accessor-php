@@ -172,6 +172,19 @@ class NestedAccessor implements NestedAccessorInterface
     {
         // let's iterate every path part from stack
         while(count($path)) {
+            if(is_array($source) && $this->isLastKeyInteger($path)) {
+                $key = array_pop($path);
+
+                if (!array_key_exists($key, $source)) {
+                    $errorsCount++;
+                    return;
+                }
+
+                $source = $source[$key];
+
+                continue;
+            }
+
             if(is_array($source) && !ArrayHelper::isAssoc($source)) {
                 // the result will be multiple
                 if(!is_array($result)) {
@@ -201,6 +214,10 @@ class NestedAccessor implements NestedAccessorInterface
             // and the source is non-associative array (list)
             /** @var mixed $source */
             if(count($path) && is_array($source) && !ArrayHelper::isAssoc($source)) {
+                if(is_array($source) && $this->isLastKeyInteger($path)) {
+                    continue;
+                }
+
                 // the result will be multiple
                 if(!is_array($result)) {
                     $result = [];
@@ -353,5 +370,15 @@ class NestedAccessor implements NestedAccessorInterface
         }
 
         return explode($this->pathDelimiter, $path);
+    }
+
+    /**
+     * @param array<string> $path
+     * @return bool
+     */
+    protected function isLastKeyInteger(array $path): bool
+    {
+        $lastKey = $path[count($path)-1];
+        return boolval(preg_match('/^[0-9]+$/', $lastKey));
     }
 }
